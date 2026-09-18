@@ -1,0 +1,17 @@
+# Xcode
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Local app data and generated bundles
+*.app/
+dist/
+*.dSYM/
+
+# Private planning material; keep the local implementation brief out of the public repository.
+ResearchBoard_macOS_implementation_spec.md
