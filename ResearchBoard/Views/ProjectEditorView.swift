@@ -62,6 +62,30 @@ struct ProjectEditorView: View {
                             }
                     }
                     PipelineEditorView(stages: $draft.stages, currentStageID: $draft.currentStageID)
+                    LabeledField("Project Color", hint: "Used for the compact board") {
+                        HStack(spacing: 9) {
+                            ForEach(ProjectColor.allCases) { color in
+                                Button {
+                                    draft.color = color
+                                } label: {
+                                    ZStack {
+                                        Circle()
+                                            .fill(color.accent)
+                                            .frame(width: 24, height: 24)
+                                        if draft.color == color {
+                                            Circle()
+                                                .strokeBorder(.white.opacity(0.9), lineWidth: 2)
+                                                .frame(width: 18, height: 18)
+                                        }
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                                .help(color.title)
+                                .accessibilityLabel("\(color.title) project color")
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
                     HStack(alignment: .top, spacing: 16) {
                         LabeledField("Current Stage") {
                             Picker("Current Stage", selection: $draft.currentStageID) {

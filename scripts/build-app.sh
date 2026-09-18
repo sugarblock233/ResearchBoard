@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUTPUT_APP="${1:-$ROOT_DIR/dist/ResearchBoard.app}"
 
 cd "$ROOT_DIR"
+swift build -c release
 BIN_PATH="$(swift build -c release --show-bin-path)/ResearchBoard"
 mkdir -p "$OUTPUT_APP/Contents/MacOS"
 cp "$BIN_PATH" "$OUTPUT_APP/Contents/MacOS/ResearchBoard"

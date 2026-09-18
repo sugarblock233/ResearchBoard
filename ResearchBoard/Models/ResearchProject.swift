@@ -6,6 +6,7 @@ struct ResearchProject: Identifiable, Codable, Equatable, Hashable {
     var stages: [ResearchStage]
     var currentStageID: UUID
     var status: ProjectStatus
+    var color: ProjectColor
     var question: String
     var currentAction: String
     var nextAction: String
@@ -16,7 +17,7 @@ struct ResearchProject: Identifiable, Codable, Equatable, Hashable {
     var sortOrder: Int
 
     private enum CodingKeys: String, CodingKey {
-        case id, name, stages, currentStageID, status, question, currentAction, nextAction
+        case id, name, stages, currentStageID, status, color, question, currentAction, nextAction
         case notes, createdAt, updatedAt, isArchived, sortOrder
     }
 
@@ -26,6 +27,7 @@ struct ResearchProject: Identifiable, Codable, Equatable, Hashable {
         stages: [ResearchStage] = ResearchProject.makeDefaultStages(),
         currentStageID: UUID? = nil,
         status: ProjectStatus = .thinking,
+        color: ProjectColor = .ocean,
         question: String = "",
         currentAction: String = "",
         nextAction: String = "",
@@ -40,6 +42,7 @@ struct ResearchProject: Identifiable, Codable, Equatable, Hashable {
         self.stages = stages
         self.currentStageID = currentStageID ?? stages.first?.id ?? UUID()
         self.status = status
+        self.color = color
         self.question = question
         self.currentAction = currentAction
         self.nextAction = nextAction
@@ -64,6 +67,7 @@ struct ResearchProject: Identifiable, Codable, Equatable, Hashable {
             stages: stages,
             currentStageID: try container.decodeIfPresent(UUID.self, forKey: .currentStageID),
             status: status,
+            color: try container.decodeIfPresent(ProjectColor.self, forKey: .color) ?? .ocean,
             question: try container.decodeIfPresent(String.self, forKey: .question) ?? "",
             currentAction: try container.decodeIfPresent(String.self, forKey: .currentAction) ?? "",
             nextAction: try container.decodeIfPresent(String.self, forKey: .nextAction) ?? "",

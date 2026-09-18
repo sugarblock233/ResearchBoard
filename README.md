@@ -24,10 +24,11 @@ Changes are written atomically. A startup backup is kept for every launch, with 
 
 ## Interactions
 
-- Click a card to expand its recent progress.
+- The default board is a compact thumbnail grid: each project shows its name, status, current stage, and a small segmented progress bar.
+- Click a thumbnail to open the detailed project page. The detailed page keeps the full pipeline, research question, current/next actions, notes, and editing controls available.
 - Click a stage to move the current stage after confirmation.
 - Use the status capsule to change status.
 - `⌘N` creates a project, `⌘E` edits the selected project, `⌘R` adds progress, and `⌘O` is available from the data-folder menu.
-- Project editing includes a small pipeline editor, archive, and delete actions.
+- Project editing includes a small pipeline editor, ten preset project colors, archive, and delete actions. A project color is saved independently from its status, so changing status does not recolor the project.
 
 The interface uses native SwiftUI materials and semantic system colors so Light and Dark Mode follow macOS naturally.

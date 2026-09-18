@@ -4,11 +4,20 @@ struct ProjectCardView: View {
     @EnvironmentObject private var store: ResearchStore
 
     let project: ResearchProject
+    let startExpanded: Bool
+    let allowsToggle: Bool
     @State private var isExpanded = false
     @State private var pendingStage: ResearchStage?
     @State private var isShowingProgress = false
     @State private var isShowingEditor = false
     @State private var isShowingDeleteConfirmation = false
+
+    init(project: ResearchProject, startExpanded: Bool = false, allowsToggle: Bool = true) {
+        self.project = project
+        self.startExpanded = startExpanded
+        self.allowsToggle = allowsToggle
+        _isExpanded = State(initialValue: startExpanded)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -36,6 +45,7 @@ struct ProjectCardView: View {
         .contentShape(Rectangle())
         .onTapGesture {
             store.selectedProjectID = project.id
+            guard allowsToggle else { return }
             withAnimation(.easeInOut(duration: 0.18)) { isExpanded.toggle() }
         }
         .confirmationDialog(

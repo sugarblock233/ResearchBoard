@@ -10,7 +10,7 @@ struct ResearchBoardApp: App {
                 .environmentObject(store)
                 .preferredColorScheme(nil)
         }
-        .defaultSize(width: 1000, height: 760)
+        .defaultSize(width: 760, height: 540)
         .commands {
             CommandGroup(replacing: .help) {
                 Button("Research Board Help") {

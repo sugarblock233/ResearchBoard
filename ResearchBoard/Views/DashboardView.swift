@@ -11,50 +11,23 @@ struct DashboardView: View {
     @State private var projectForProgress: ResearchProject?
 
     var body: some View {
-        ZStack {
-            Color(nsColor: .windowBackgroundColor)
-                .ignoresSafeArea()
-            VStack(spacing: 0) {
-                header
-                Divider()
-                    .opacity(0.55)
-                ScrollView {
-                    if store.activeProjects.isEmpty {
-                        EmptyStateView { isShowingNewProject = true }
-                            .padding(.horizontal, 20)
-                    } else {
-                        LazyVStack(spacing: 14) {
-                            ForEach(store.activeProjects) { project in
-                                ProjectCardView(project: project)
-                                    .environmentObject(store)
-                                    .onDrag {
-                                        NSItemProvider(object: project.id.uuidString as NSString)
-                                    }
-                                    .onDrop(
-                                        of: [UTType.text],
-                                        delegate: ProjectDropDelegate(targetID: project.id, store: store)
-                                    )
-                            }
-                            Button {
-                                isShowingNewProject = true
-                            } label: {
-                                Label("New Project", systemImage: "plus")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                            }
-                            .buttonStyle(.bordered)
-                            .controlSize(.large)
-                            .keyboardShortcut("n", modifiers: .command)
-                            .padding(.top, 2)
-                        }
-                        .padding(20)
-                    }
+        NavigationStack {
+            ZStack {
+                Color(nsColor: .windowBackgroundColor)
+                    .ignoresSafeArea()
+                VStack(spacing: 0) {
+                    header
+                    Divider()
+                        .opacity(0.55)
+                    boardContent
                 }
             }
-            keyboardShortcuts
+            .navigationDestination(for: UUID.self) { projectID in
+                ProjectDetailView(projectID: projectID)
+            }
+            .background(Color(nsColor: .windowBackgroundColor))
         }
-        .frame(minWidth: 760, minHeight: 500)
+        .frame(minWidth: 620, minHeight: 430)
         .sheet(isPresented: $isShowingNewProject) {
             ProjectEditorView(mode: .new) { project in
                 store.addProject(project)
@@ -96,18 +69,61 @@ struct DashboardView: View {
         } message: {
             Text(store.saveError?.localizedDescription ?? "Please check that the ResearchBoard folder is writable.")
         }
+        .background(keyboardShortcuts)
+    }
+
+    private var boardContent: some View {
+        Group {
+            if store.activeProjects.isEmpty {
+                EmptyStateView { isShowingNewProject = true }
+                    .padding(.horizontal, 18)
+            } else {
+                ScrollView {
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: 220, maximum: 330), spacing: 14)],
+                        spacing: 14
+                    ) {
+                        ForEach(store.activeProjects) { project in
+                            NavigationLink(value: project.id) {
+                                ProjectThumbnailView(project: project)
+                            }
+                            .buttonStyle(.plain)
+                            .onTapGesture { store.selectedProjectID = project.id }
+                            .onDrag {
+                                store.selectedProjectID = project.id
+                                return NSItemProvider(object: project.id.uuidString as NSString)
+                            }
+                            .onDrop(
+                                of: [UTType.text],
+                                delegate: ProjectDropDelegate(targetID: project.id, store: store)
+                            )
+                        }
+                        Button {
+                            isShowingNewProject = true
+                        } label: {
+                            Label("New Project", systemImage: "plus")
+                                .font(.system(size: 13, weight: .semibold))
+                                .frame(maxWidth: .infinity, minHeight: 142)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.large)
+                    }
+                    .padding(18)
+                }
+            }
+        }
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 16) {
-            VStack(alignment: .leading, spacing: 5) {
+        HStack(alignment: .center, spacing: 15) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text("Research Board")
-                    .font(.system(size: 25, weight: .semibold, design: .rounded))
-                Text("\(store.activeProjects.count) active \(store.activeProjects.count == 1 ? "project" : "projects") · \(store.attentionCount) need attention")
+                    .font(.system(size: 23, weight: .semibold, design: .rounded))
+                Text("\(store.activeProjects.count) active · \(store.attentionCount) need attention")
                     .font(.system(size: 12, weight: .medium, design: .rounded))
                     .foregroundStyle(.secondary)
             }
-            Spacer()
+            Spacer(minLength: 10)
             Button {
                 isShowingNewProject = true
             } label: {
@@ -115,7 +131,7 @@ struct DashboardView: View {
                     .font(.system(size: 13, weight: .semibold))
             }
             .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .controlSize(.regular)
             .keyboardShortcut("n", modifiers: .command)
             Menu {
                 Button("Open Data Folder", systemImage: "folder") { store.openDataDirectory() }
@@ -133,24 +149,24 @@ struct DashboardView: View {
             .menuStyle(.borderlessButton)
             .help("More options")
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 18)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 15)
     }
 
     private var keyboardShortcuts: some View {
         HStack(spacing: 0) {
             Button("Edit selected project") {
-                if let id = store.selectedProjectID { projectForEdit = store.project(withID: id) }
+                guard let id = store.selectedProjectID else { return }
+                projectForEdit = store.project(withID: id)
             }
             .keyboardShortcut("e", modifiers: .command)
             Button("Add progress to selected project") {
-                if let id = store.selectedProjectID { projectForProgress = store.project(withID: id) }
+                guard let id = store.selectedProjectID else { return }
+                projectForProgress = store.project(withID: id)
             }
-            .keyboardShortcut("r", modifiers: .command)
-            Button("Open data folder") {
-                store.openDataDirectory()
-            }
-            .keyboardShortcut("o", modifiers: .command)
+                .keyboardShortcut("r", modifiers: .command)
+            Button("Open data folder") { store.openDataDirectory() }
+                .keyboardShortcut("o", modifiers: .command)
         }
         .opacity(0.001)
         .frame(width: 1, height: 1)
@@ -182,13 +198,10 @@ struct ProjectDropDelegate: DropDelegate {
                   let sourceIndex = visibleProjects.firstIndex(where: { $0.id == sourceID }),
                   let targetIndex = visibleProjects.firstIndex(where: { $0.id == targetID }) else { return }
             Task { @MainActor in
-                var activeIDs = store.activeProjects.map(\.id)
-                activeIDs.move(fromOffsets: IndexSet(integer: sourceIndex), toOffset: targetIndex > sourceIndex ? targetIndex + 1 : targetIndex)
-                for (index, id) in activeIDs.enumerated() {
-                    guard var project = store.project(withID: id) else { continue }
-                    project.sortOrder = index
-                    store.updateProject(project)
-                }
+                store.moveProject(
+                    fromOffsets: IndexSet(integer: sourceIndex),
+                    toOffset: targetIndex > sourceIndex ? targetIndex + 1 : targetIndex
+                )
             }
         }
     }

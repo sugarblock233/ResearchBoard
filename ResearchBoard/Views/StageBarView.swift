@@ -49,7 +49,7 @@ struct StageBarView: View {
                             Text("CURRENT")
                                 .font(.system(size: 9, weight: .bold, design: .rounded))
                                 .tracking(0.55)
-                                .foregroundStyle(project.status.tint)
+                                .foregroundStyle(project.color.accent)
                         } else {
                             Color.clear.frame(height: 11)
                         }
@@ -65,8 +65,8 @@ struct StageBarView: View {
     }
 
     private func fillColor(for index: Int) -> Color {
-        if project.status == .done || index < currentIndex { return project.status.tint.opacity(0.72) }
-        if index == currentIndex { return project.status.tint }
+        if project.status == .done || index < currentIndex { return project.color.accent.opacity(0.72) }
+        if index == currentIndex { return project.color.accent }
         return Color.primary.opacity(0.10)
     }
 
